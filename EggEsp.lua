@@ -1,189 +1,143 @@
--- Grow a Garden ESP + Reroll GUI (Cool Design by KentNeedprofits)
+-- Services
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Accurate Egg → Pet mapping
-local eggPets = {
-    ["Common Egg"] = {"Bunny","Dog","Golden Lab"},
-    ["Uncommon Egg"] = {"Black Bunny","Cat","Chicken","Deer"},
-    ["Rare Egg"] = {"Orange Tabby","Spotted Deer","Pig","Rooster","Monkey"},
-    ["Legendary Egg"] = {"Cow","Silver Monkey","Sea Otter","Turtle","Polar Bear"},
-    ["Mythical Egg"] = {"Grey Mouse","Brown Mouse","Squirrel","Red Giant Ant","Red Fox"},
-    ["Bug Egg"] = {"Snail","Giant Ant","Caterpillar","Praying Mantis","Dragonfly"},
-    ["Anti Bee Egg"] = {"Disco Bee","Butterfly","Moth","Tarantula Hawk","Wasp"},
-    ["Common Summer Egg"] = {"Starfish","Seagull","Crab"},
-    ["Rare Summer Egg"] = {"Flamingo","Toucan","Sea Turtle","Orangutan","Seal"},
-    ["Paradise Egg"] = {"Ostrich","Peacock","Capybara","Scarlet Macaw","Mimic Octopus"},
-    ["Dinosaur Egg"] = {"Raptor","Triceratops","Stegosaurus","Pterodactyl","Brontosaurus","T-Rex"},
-    ["Primal Egg"] = {"Parasaurolophus","Iguanodon","Pachycephalosaurus","Dilophosaurus","Ankylosaurus","Spinosaurus"},
-    ["Zen Egg"] = {"Shiba Inu","Nihonzaru","Tanuki","Tanchozuru","Kappa","Kitsune"}
-}
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KeySystemGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
 
-local function getEggType(name)
-    for k in pairs(eggPets) do
-        if name:find(k) then return k end
-    end
-end
-
--- GUI creation
-local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-gui.Name = "EggRandomizerGUI"
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,260,0,200)
-frame.Position = UDim2.new(0.5,-130,0.3,0)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BackgroundTransparency = 0.05
+-- Main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+frame.Parent = screenGui
+
+-- UICorner
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
 
 -- Title
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0.2,0)
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.FredokaOne
-title.TextScaled = true
-title.Text = "🎲 EGG RANDOMIZER"
-title.TextColor3 = Color3.fromRGB(0, 255, 200)
+title.Text = "Key System"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = frame
 
--- ESP Button
-local espBtn = Instance.new("TextButton", frame)
-espBtn.Size = UDim2.new(0.8, 0, 0.2, 0)
-espBtn.Position = UDim2.new(0.1, 0, 0.25, 0)
-espBtn.Text = "ESP OFF"
-espBtn.Font = Enum.Font.GothamBold
-espBtn.TextScaled = true
-espBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-espBtn.TextColor3 = Color3.fromRGB(255,255,255)
-Instance.new("UICorner", espBtn).CornerRadius = UDim.new(0,8)
+-- Key Input
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0.65, -5, 0, 30)
+keyBox.Position = UDim2.new(0.05, 0, 0.3, 0)
+keyBox.PlaceholderText = "Enter Key"
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 14
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+keyBox.BorderSizePixel = 0
+keyBox.Parent = frame
 
--- Reroll Button
-local rerollBtn = Instance.new("TextButton", frame)
-rerollBtn.Size = UDim2.new(0.8, 0, 0.2, 0)
-rerollBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
-rerollBtn.Text = "REROLL"
-rerollBtn.Font = Enum.Font.GothamBold
-rerollBtn.TextScaled = true
-rerollBtn.BackgroundColor3 = Color3.fromRGB(90,60,130)
-rerollBtn.TextColor3 = Color3.fromRGB(255,255,255)
-Instance.new("UICorner", rerollBtn).CornerRadius = UDim.new(0,8)
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 6)
+boxCorner.Parent = keyBox
+
+-- Click Free Key Button
+local freeKeyBtn = Instance.new("TextButton")
+freeKeyBtn.Size = UDim2.new(0.45, -5, 0, 30)
+freeKeyBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
+freeKeyBtn.Text = "Click Free Key"
+freeKeyBtn.Font = Enum.Font.GothamBold
+freeKeyBtn.TextSize = 14
+freeKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+freeKeyBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 200)
+freeKeyBtn.BorderSizePixel = 0
+freeKeyBtn.Parent = frame
+
+local btnCorner1 = Instance.new("UICorner")
+btnCorner1.CornerRadius = UDim.new(0, 6)
+btnCorner1.Parent = freeKeyBtn
+
+-- Submit Button
+local submitBtn = Instance.new("TextButton")
+submitBtn.Size = UDim2.new(0.45, -5, 0, 30)
+submitBtn.Position = UDim2.new(0.5, 5, 0.55, 0)
+submitBtn.Text = "Submit"
+submitBtn.Font = Enum.Font.GothamBold
+submitBtn.TextSize = 14
+submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+submitBtn.BorderSizePixel = 0
+submitBtn.Parent = frame
+
+local btnCorner2 = Instance.new("UICorner")
+btnCorner2.CornerRadius = UDim.new(0, 6)
+btnCorner2.Parent = submitBtn
+
+-- Progress Bar Frame (hidden until clicked)
+local progressFrame = Instance.new("Frame")
+progressFrame.Size = UDim2.new(0.9, 0, 0, 10)
+progressFrame.Position = UDim2.new(0.05, 0, 0.9, 0)
+progressFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+progressFrame.BorderSizePixel = 0
+progressFrame.Visible = false
+progressFrame.Parent = frame
+
+local progressCorner = Instance.new("UICorner")
+progressCorner.CornerRadius = UDim.new(0, 5)
+progressCorner.Parent = progressFrame
+
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(1, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+progressBar.BorderSizePixel = 0
+progressBar.Parent = progressFrame
+
+local progressBarCorner = Instance.new("UICorner")
+progressBarCorner.CornerRadius = UDim.new(0, 5)
+progressBarCorner.Parent = progressBar
 
 -- Countdown Label
-local cdLabel = Instance.new("TextLabel", frame)
-cdLabel.Size = UDim2.new(1,0,0.15,0)
-cdLabel.Position = UDim2.new(0,0,0.72,0)
-cdLabel.BackgroundTransparency = 1
-cdLabel.Font = Enum.Font.GothamBold
-cdLabel.TextScaled = true
-cdLabel.TextColor3 = Color3.fromRGB(255,255,120)
+local countdownLabel = Instance.new("TextLabel")
+countdownLabel.Size = UDim2.new(1, 0, 0, 20)
+countdownLabel.Position = UDim2.new(0, 0, 0.75, 0)
+countdownLabel.BackgroundTransparency = 1
+countdownLabel.Text = ""
+countdownLabel.Font = Enum.Font.Gotham
+countdownLabel.TextSize = 14
+countdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+countdownLabel.Parent = frame
 
--- Credits
-local credits = Instance.new("TextLabel", frame)
-credits.Size = UDim2.new(1,0,0,20)
-credits.Position = UDim2.new(0,0,1,-20)
-credits.BackgroundTransparency = 1
-credits.Font = Enum.Font.Gotham
-credits.TextSize = 12
-credits.Text = "👑 Made By KentNeedprofits"
-credits.TextColor3 = Color3.fromRGB(180,180,180)
-
--- ESP logic
-local espOn, espConn = false, nil
-local function updateESP()
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not (espOn and hrp) then return end
-    for _, egg in ipairs(workspace:GetDescendants()) do
-        if egg:IsA("Model") and egg.Name:find("Egg") then
-            local typ = getEggType(egg.Name)
-            local part = egg:FindFirstChildWhichIsA("BasePart") or egg.PrimaryPart
-            if typ and part then
-                local dist = (part.Position - hrp.Position).Magnitude
-                if dist <= 25 then
-                    local petVal = egg:FindFirstChild("AssignedPet") or Instance.new("StringValue", egg)
-                    petVal.Name = "AssignedPet"
-                    petVal.Value = petVal.Value or eggPets[typ][math.random(#eggPets[typ])]
-                    local guiEl = egg:FindFirstChild("ESPLabel") or Instance.new("BillboardGui", egg)
-                    guiEl.Name = "ESPLabel"
-                    guiEl.Adornee = part
-                    guiEl.Size = UDim2.new(0,140,0,30)
-                    guiEl.StudsOffset = Vector3.new(0,3,0)
-                    guiEl.AlwaysOnTop = true
-                    local lbl = guiEl:FindFirstChildOfClass("TextLabel") or Instance.new("TextLabel", guiEl)
-                    lbl.Size = UDim2.new(1,0,1,0)
-                    lbl.BackgroundTransparency = 1
-                    lbl.Font = Enum.Font.FredokaOne
-                    lbl.TextScaled = true
-                    lbl.TextColor3 = Color3.fromRGB(255,255,100)
-                    lbl.Text = petVal.Value
-                    guiEl.Enabled = true
-                else
-                    local guiEl = egg:FindFirstChild("ESPLabel")
-                    if guiEl then guiEl.Enabled = false end
-                end
-            end
-        end
-    end
+-- Functions
+local function startCountdown()
+	progressFrame.Visible = true
+	for i = 100, 0, -1 do
+		countdownLabel.Text = "Countdown: " .. i
+		progressBar.Size = UDim2.new(i/100, 0, 1, 0)
+		wait(0.1) -- slow countdown
+	end
+	keyBox.Text = "KentOnTop"
 end
 
-espBtn.MouseButton1Click:Connect(function()
-    espOn = not espOn
-    espBtn.Text = espOn and "ESP ON" or "ESP OFF"
-    espBtn.BackgroundColor3 = espOn and Color3.fromRGB(0,200,0) or Color3.fromRGB(50,50,50)
-    if espOn then
-        updateESP()
-        espConn = RunService.RenderStepped:Connect(updateESP)
-    else
-        if espConn then espConn:Disconnect() end
-        for _, egg in ipairs(workspace:GetDescendants()) do
-            local guiEl = egg:FindFirstChild("ESPLabel")
-            if guiEl then guiEl:Destroy() end
-        end
-    end
-end)
+local function checkKey()
+	if keyBox.Text == "KentOnTop" then
+		screenGui:Destroy()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/KentOnTop/NewEggRandomizers/refs/heads/main/EggEsp.lua"))()
+	else
+		countdownLabel.Text = "Wrong Key!"
+	end
+end
 
--- Reroll animation (cooler shuffle)
-rerollBtn.MouseButton1Click:Connect(function()
-    if not espOn then return end
-    cdLabel.Text = ""
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local valid = {}
-    for _, egg in ipairs(workspace:GetDescendants()) do
-        if egg:IsA("Model") and egg.Name:find("Egg") then
-            local typ = getEggType(egg.Name)
-            local part = egg:FindFirstChildWhichIsA("BasePart") or egg.PrimaryPart
-            local guiEl = egg:FindFirstChild("ESPLabel")
-            local lbl = guiEl and guiEl:FindFirstChildOfClass("TextLabel")
-            if typ and part and lbl and (part.Position - hrp.Position).Magnitude <= 25 then
-                table.insert(valid, {label = lbl, list = eggPets[typ], egg = egg})
-            end
-        end
-    end
-
-    local running, speed = true, 0.1
-    task.spawn(function()
-        while running do
-            for _, data in ipairs(valid) do
-                data.label.Text = data.list[math.random(#data.list)]
-            end
-            wait(speed)
-        end
-    end)
-
-    for i = 10, 0, -1 do
-        cdLabel.Text = "🎰 Shuffling: "..i
-        if i <= 5 then speed = speed + 0.02 end
-        wait(1)
-    end
-
-    running = false
-    cdLabel.Text = ""
-    for _, data in ipairs(valid) do
-        local final = data.list[math.random(#data.list)]
-        local petVal = data.egg:FindFirstChild("AssignedPet")
-        if petVal then petVal.Value = final end
-        data.label.Text = final
-    end
-end)
+-- Button Connections
+freeKeyBtn.MouseButton1Click:Connect(startCountdown)
+submitBtn.MouseButton1Click:Connect(checkKey)
